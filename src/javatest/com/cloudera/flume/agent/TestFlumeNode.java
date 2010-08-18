@@ -154,7 +154,7 @@ public class TestFlumeNode {
     node.loadConfig(cfg); // this will load the NextExnSource and a NullSink
 
     Map<String, ReportEvent> reports = new HashMap<String, ReportEvent>();
-    node.getReports(reports);
+    node.getSimpleReports(reports);
     assertEquals(3, reports.size()); // source + sink reports
 
     // sleep so that we open-append-fail-close, open-append-fail-close

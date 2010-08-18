@@ -82,7 +82,7 @@ public class TestAgentFailChainSink {
         "counter(\"foo2\")", "counter(\"foo3\")");
     LOG.info("best effort failchain: " + spec);
     EventSink snk = FlumeBuilder.buildSink(new Context(), spec);
-    LOG.info(snk.getReport().toJson());
+    LOG.info(snk.getMetrics().toJson());
     ReportManager.get().getReportable("foo1");
   }
 
@@ -108,7 +108,7 @@ public class TestAgentFailChainSink {
     String node = NetUtils.localhost();
     EventSink snk = FlumeBuilder.buildSink(new LogicalNodeContext(node, node),
         spec);
-    LOG.info(snk.getReport().toJson());
+    LOG.info(snk.getMetrics().toJson());
     ReportManager.get().getReportable("foo1");
   }
 

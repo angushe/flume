@@ -214,7 +214,7 @@ public class TestTailDirSource {
     FileUtil.rmr(tmpdir);
 
     // only did 10 files, ignored the dir.
-    assertEquals(Long.valueOf(10), src.getReport().getLongMetric(
+    assertEquals(Long.valueOf(10), src.getMetrics().getLongMetric(
         TailDirSource.A_FILESADDED));
   }
 
@@ -314,8 +314,8 @@ public class TestTailDirSource {
     FileUtil.rmr(tmpdir);
 
     // in total 20 files were added
-    assertEquals(Long.valueOf(20),
-        src.getReport().getLongMetric(TailDirSource.A_FILESADDED));
+    assertEquals(Long.valueOf(20), src.getMetrics().getLongMetric(
+        TailDirSource.A_FILESADDED));
   }
 
   /**
@@ -403,11 +403,15 @@ public class TestTailDirSource {
     cnt.close();
     FileUtil.rmr(tmpdir);
 
-    ReportEvent report = src.getReport();
-    assertEquals(Long.valueOf(80), report.getLongMetric(TailDirSource.A_FILESADDED));
-    assertEquals(Long.valueOf(20), report.getLongMetric(TailDirSource.A_FILESDELETED));
-    assertEquals(Long.valueOf(4), report.getLongMetric(TailDirSource.A_SUBDIRSADDED));
-    assertEquals(Long.valueOf(1), report.getLongMetric(TailDirSource.A_SUBDIRSDELETED));
+    ReportEvent report = src.getMetrics();
+    assertEquals(Long.valueOf(80), report
+        .getLongMetric(TailDirSource.A_FILESADDED));
+    assertEquals(Long.valueOf(20), report
+        .getLongMetric(TailDirSource.A_FILESDELETED));
+    assertEquals(Long.valueOf(4), report
+        .getLongMetric(TailDirSource.A_SUBDIRSADDED));
+    assertEquals(Long.valueOf(1), report
+        .getLongMetric(TailDirSource.A_SUBDIRSDELETED));
   }
 
   private void addLinesToExistingFiles(File tmpdir, int lines)
@@ -448,9 +452,9 @@ public class TestTailDirSource {
     Clock.sleep(1000);
     assertEquals(2000, cnt.getCount());
 
-    ReportEvent rpt1 = src.getReport();
-    assertEquals(Long.valueOf(200),
-        rpt1.getLongMetric(TailDirSource.A_FILESPRESENT));
+    ReportEvent rpt1 = src.getMetrics();
+    assertEquals(Long.valueOf(200), rpt1
+        .getLongMetric(TailDirSource.A_FILESPRESENT));
 
     FileUtil.rmr(tmpdir); // This fails in windows because taildir keeps file
     // open
@@ -458,11 +462,11 @@ public class TestTailDirSource {
     Clock.sleep(1000);
     assertEquals(2000, cnt.getCount());
 
-    ReportEvent rpt = src.getReport();
-    assertEquals(rpt.getLongMetric(TailDirSource.A_FILESADDED),
-        rpt.getLongMetric(TailDirSource.A_FILESDELETED));
-    assertEquals(Long.valueOf(0),
-        rpt.getLongMetric(TailDirSource.A_FILESPRESENT));
+    ReportEvent rpt = src.getMetrics();
+    assertEquals(rpt.getLongMetric(TailDirSource.A_FILESADDED), rpt
+        .getLongMetric(TailDirSource.A_FILESDELETED));
+    assertEquals(Long.valueOf(0), rpt
+        .getLongMetric(TailDirSource.A_FILESPRESENT));
 
     drv.stop();
     src.close();

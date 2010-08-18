@@ -56,7 +56,7 @@ public class TestInsistentOpen {
     // two exceptions then some success
     doThrow(new IOException("mock2")).doThrow(new IOException("mock"))
         .doNothing().when(fail2x).open();
-    doReturn(new ReportEvent("stub")).when(fail2x).getReport();
+    doReturn(new ReportEvent("stub")).when(fail2x).getMetrics();
 
     // max 5s, backoff initially at 10ms
 
@@ -70,9 +70,9 @@ public class TestInsistentOpen {
     sink.open();
     sink.append(new EventImpl("test".getBytes()));
     sink.close();
-    fail2x.getReport();
+    fail2x.getMetrics();
 
-    ReportEvent rpt = sink.getReport();
+    ReportEvent rpt = sink.getMetrics();
     assertEquals(new Long(1), rpt
         .getLongMetric(InsistentOpenDecorator.A_REQUESTS));
     assertEquals(new Long(3), rpt
@@ -93,7 +93,7 @@ public class TestInsistentOpen {
     final MockClock m = new MockClock(0);
 
     EventSink failWhale = new EventSink.Base() {
-      public ReportEvent getReport() {
+      public ReportEvent getMetrics() {
         return new ReportEvent("failwhale-report");
       }
 
@@ -115,7 +115,7 @@ public class TestInsistentOpen {
       sink.open();
     } catch (IOException e1) {
 
-      ReportEvent rpt = sink.getReport();
+      ReportEvent rpt = sink.getMetrics();
       assertEquals(new Long(1), rpt
           .getLongMetric(InsistentOpenDecorator.A_REQUESTS));
       assertEquals(new Long(0), rpt
@@ -150,7 +150,7 @@ public class TestInsistentOpen {
     EventSink fail4eva = mock(EventSink.Base.class);
     // two exceptions then some success
     doThrow(new IOException("mock")).when(fail4eva).open();
-    doReturn(new ReportEvent("stub")).when(fail4eva).getReport();
+    doReturn(new ReportEvent("stub")).when(fail4eva).getMetrics();
 
     final CountDownLatch done = new CountDownLatch(1);
 

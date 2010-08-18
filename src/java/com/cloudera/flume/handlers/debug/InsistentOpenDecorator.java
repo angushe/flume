@@ -212,11 +212,30 @@ public class InsistentOpenDecorator<S extends EventSink> extends
   }
 
   @Override
+  public ReportEvent getMetrics() {
+    ReportEvent rpt = super.getMetrics();
+
+    // parameters
+    rpt.hierarchicalMerge("backoffPolicy." + backoff.getName(), backoff
+        .getMetrics());
+
+    // counters
+    rpt.setLongMetric(A_REQUESTS, openRequests);
+    rpt.setLongMetric(A_ATTEMPTS, openAttempts);
+    rpt.setLongMetric(A_SUCCESSES, openSuccesses);
+    rpt.setLongMetric(A_RETRIES, openRetries);
+    rpt.setLongMetric(A_GIVEUPS, openGiveups);
+
+    return rpt;
+  }
+  
+  @Override
   public ReportEvent getReport() {
     ReportEvent rpt = super.getReport();
 
     // parameters
-    rpt.hierarchicalMerge(backoff.getName(), backoff.getReport());
+    rpt.hierarchicalMerge("backoffPolicy." + backoff.getName(), backoff
+        .getMetrics());
 
     // counters
     rpt.setLongMetric(A_REQUESTS, openRequests);

@@ -103,7 +103,13 @@ public class AgentFailChainSink extends EventSink.Base {
   }
 
   @Override
-  public void getReports(String namePrefix, Map<String, ReportEvent> reports) {
+  public ReportEvent getMetrics() {
+    return snk.getMetrics();
+  }
+
+  @Override
+  public void getReports(String namePrefix,
+      Map<String, ReportEvent> reports) {
     super.getReports(namePrefix, reports);
     snk.getReports(namePrefix + getName() + ".", reports);
   }

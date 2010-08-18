@@ -468,4 +468,5 @@ public class ReportEvent extends EventImpl {
     }
     return sw.getBuffer().toString();
   }
+
 }

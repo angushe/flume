@@ -17,7 +17,11 @@
  */
 package com.cloudera.util;
 
+import java.util.Map;
+
 import com.cloudera.flume.reporter.ReportEvent;
+import com.cloudera.flume.reporter.ReportUtils;
+import com.cloudera.flume.reporter.Reportable;
 
 public class AlwaysRetryPolicy implements BackoffPolicy {
 
@@ -54,8 +58,13 @@ public class AlwaysRetryPolicy implements BackoffPolicy {
   }
 
   @Override
-  public ReportEvent getReport() {
+  public ReportEvent getMetrics() {
     return null;
+  }
+
+  @Override
+  public Map<String, Reportable> getSubMetrics() {
+    return ReportUtils.noChildren();
   }
 
 }

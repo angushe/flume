@@ -115,7 +115,7 @@ public class TestThriftSinks implements ExampleData {
     }
     tes.close();
     assertEquals(25, cnt.getCount());
-    ReportEvent rpt = tes.getReport();
+    ReportEvent rpt = tes.getMetrics();
     assertEquals(4475, rpt.getLongMetric(ThriftEventSource.A_BYTES_IN)
         .longValue());
     assertEquals(25, rpt.getLongMetric(ThriftEventSource.A_DEQUEUED)
@@ -280,7 +280,7 @@ public class TestThriftSinks implements ExampleData {
 
     tes.close();
     assertEquals(25 * threads, cnt.getCount());
-    ReportEvent rpt = tes.getReport();
+    ReportEvent rpt = tes.getMetrics();
     assertEquals(4475 * threads, sendByteSum.get());
     assertEquals(4475 * threads, rpt
         .getLongMetric(ThriftEventSource.A_BYTES_IN).longValue());

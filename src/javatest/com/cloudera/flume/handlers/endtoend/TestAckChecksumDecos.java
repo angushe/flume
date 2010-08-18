@@ -249,7 +249,7 @@ public class TestAckChecksumDecos {
       return;
     }
 
-    LOG.info(cc.getReport().toJson());
+    LOG.info(cc.getMetrics().toJson());
 
     fail("should have failed");
   }

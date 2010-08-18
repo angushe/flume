@@ -23,6 +23,7 @@ import java.util.Map;
 import com.cloudera.flume.conf.Context;
 import com.cloudera.flume.conf.SourceFactory.SourceBuilder;
 import com.cloudera.flume.reporter.ReportEvent;
+import com.cloudera.flume.reporter.ReportUtils;
 import com.cloudera.flume.reporter.Reportable;
 import com.google.common.base.Preconditions;
 
@@ -49,7 +50,8 @@ public interface EventSource extends Reportable {
    * Generates one or more reports in some sort of readable format using the
    * supplied naming prefix.
    */
-  public void getReports(String namePrefix, Map<String, ReportEvent> reports);
+  public void getReports(String namePrefix,
+      Map<String, ReportEvent> reports);
 
   /**
    * The stub source is a place holder that can get instantiated but never
@@ -79,8 +81,13 @@ public interface EventSource extends Reportable {
     }
 
     @Override
-    public ReportEvent getReport() {
+    public ReportEvent getMetrics() {
       return new ReportEvent(getName());
+    }
+
+    @Override
+    public Map<String, Reportable> getSubMetrics() {
+      return ReportUtils.noChildren();
     }
 
     public static SourceBuilder builder() {
@@ -111,8 +118,9 @@ public interface EventSource extends Reportable {
     }
 
     @Override
-    public void getReports(String namePrefix, Map<String, ReportEvent> reports) {
-      reports.put(namePrefix + getName(), getReport());
+    public void getReports(String namePrefix,
+        Map<String, ReportEvent> reports) {
+      reports.put(namePrefix + getName(), getMetrics());
     }
   }
 
@@ -159,7 +167,7 @@ public interface EventSource extends Reportable {
     }
 
     @Override
-    synchronized public ReportEvent getReport() {
+    synchronized public ReportEvent getMetrics() {
       ReportEvent rpt = new ReportEvent(getName());
 
       rpt.setStringMetric(R_TYPE, getName());
@@ -170,8 +178,14 @@ public interface EventSource extends Reportable {
     }
 
     @Override
-    public void getReports(String namePrefix, Map<String, ReportEvent> reports) {
-      reports.put(namePrefix + getName(), getReport());
+    public Map<String, Reportable> getSubMetrics() {
+      return ReportUtils.noChildren();
+    }
+
+    @Override
+    public void getReports(String namePrefix,
+        Map<String, ReportEvent> reports) {
+      reports.put(namePrefix + getName(), getMetrics());
     }
   }
 

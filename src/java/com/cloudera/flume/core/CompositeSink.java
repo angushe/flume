@@ -18,12 +18,14 @@
 package com.cloudera.flume.core;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.cloudera.flume.conf.Context;
 import com.cloudera.flume.conf.FlumeBuilder;
 import com.cloudera.flume.conf.FlumeSpecException;
 import com.cloudera.flume.reporter.ReportEvent;
+import com.cloudera.flume.reporter.Reportable;
 
 /**
  * This sink takes a data flow spec string as a constructor argument. It parses
@@ -64,6 +66,16 @@ public class CompositeSink extends EventSink.Base {
   @Override
   public String getName() {
     return snk.getName();
+  }
+
+  @Override
+  public ReportEvent getMetrics() {
+    return snk.getMetrics();
+  }
+
+  @Override
+  public Map<String, Reportable> getSubMetrics() {
+    return snk.getSubMetrics();
   }
 
   @Override

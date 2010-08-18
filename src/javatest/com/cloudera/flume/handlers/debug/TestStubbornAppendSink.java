@@ -82,7 +82,7 @@ public class TestStubbornAppendSink {
     }
     Assert.assertEquals(ok.get(), 100);
 
-    ReportEvent rpt = sink.getReport();
+    ReportEvent rpt = sink.getMetrics();
     Writer out = new OutputStreamWriter(System.out);
     rpt.toJson(out);
     out.flush();
@@ -115,7 +115,7 @@ public class TestStubbornAppendSink {
     // fourth
     doNothing().doNothing().doThrow(new IOException()).doNothing().when(
         failAppend).append(Mockito.<Event> anyObject());
-    doReturn(new ReportEvent("stub")).when(failAppend).getReport();
+    doReturn(new ReportEvent("stub")).when(failAppend).getMetrics();
 
     StubbornAppendSink<EventSink> sink = new StubbornAppendSink<EventSink>(
         failAppend);
@@ -126,7 +126,7 @@ public class TestStubbornAppendSink {
       System.out.println(i);
     }
 
-    ReportEvent rpt = sink.getReport();
+    ReportEvent rpt = sink.getMetrics();
     Assert.assertEquals(new Long(1), rpt
         .getLongMetric(StubbornAppendSink.A_FAILS));
     Assert.assertEquals(new Long(1), rpt
@@ -159,7 +159,7 @@ public class TestStubbornAppendSink {
     }
     Assert.assertEquals(ok.get(), 100);
 
-    ReportEvent rpt = sink.getReport();
+    ReportEvent rpt = sink.getMetrics();
     // why isn't this 25?
     Assert.assertEquals(new Long(24), rpt
         .getLongMetric(StubbornAppendSink.A_FAILS));
@@ -175,7 +175,7 @@ public class TestStubbornAppendSink {
     // two ok, and then two exception throwing cases
     doNothing().doNothing().doThrow(new IOException()).doThrow(
         new IOException()).when(mock).append(Mockito.<Event> anyObject());
-    doReturn(new ReportEvent("stub")).when(mock).getReport();
+    doReturn(new ReportEvent("stub")).when(mock).getMetrics();
 
     StubbornAppendSink<EventSink> sink = new StubbornAppendSink<EventSink>(mock);
     Event e = new EventImpl("foo".getBytes());
@@ -185,7 +185,7 @@ public class TestStubbornAppendSink {
     try {
       sink.append(e);
     } catch (Exception exn) {
-      ReportEvent rpt = sink.getReport();
+      ReportEvent rpt = sink.getMetrics();
       Assert.assertEquals(new Long(2), rpt
           .getLongMetric(StubbornAppendSink.A_SUCCESSES));
       Assert.assertEquals(new Long(1), rpt

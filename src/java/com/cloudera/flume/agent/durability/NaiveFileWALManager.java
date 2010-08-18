@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.flume.conf.Context;
-import com.cloudera.flume.core.Attributes;
 import com.cloudera.flume.core.Event;
 import com.cloudera.flume.core.EventImpl;
 import com.cloudera.flume.core.EventSink;
@@ -47,6 +46,8 @@ import com.cloudera.flume.handlers.rolling.RollSink;
 import com.cloudera.flume.handlers.rolling.RollTrigger;
 import com.cloudera.flume.handlers.rolling.Tagger;
 import com.cloudera.flume.reporter.ReportEvent;
+import com.cloudera.flume.reporter.ReportUtils;
+import com.cloudera.flume.reporter.Reportable;
 import com.cloudera.util.FileUtil;
 import com.google.common.base.Preconditions;
 
@@ -246,7 +247,7 @@ public class NaiveFileWALManager implements WALManager {
 
     // carry on now on your merry way.
   }
-
+  
   /**
    * This gets a new sink when rolling, and is called when rolling to a new
    * file.
@@ -256,10 +257,10 @@ public class NaiveFileWALManager implements WALManager {
     File dir = getDir(State.WRITING);
     final String tag = tagger.newTag();
 
-    EventSink bareSink = new SeqfileEventSink(
-        new File(dir, tag).getAbsoluteFile());
-    EventSink curSink = new AckChecksumInjector<EventSink>(bareSink,
-        tag.getBytes(), al);
+    EventSink bareSink = new SeqfileEventSink(new File(dir, tag)
+        .getAbsoluteFile());
+    EventSink curSink = new AckChecksumInjector<EventSink>(bareSink, tag
+        .getBytes(), al);
 
     writingQ.add(tag);
     WALData data = new WALData(tag);
@@ -296,8 +297,8 @@ public class NaiveFileWALManager implements WALManager {
       throws IOException {
     File dir = getDir(State.WRITING);
     final String tag = tagger.newTag();
-    EventSink curSink = new SeqfileEventSink(
-        new File(dir, tag).getAbsoluteFile());
+    EventSink curSink = new SeqfileEventSink(new File(dir, tag)
+        .getAbsoluteFile());
     writingQ.add(tag);
     WALData data = new WALData(tag);
     table.put(tag, data);
@@ -618,27 +619,34 @@ public class NaiveFileWALManager implements WALManager {
   }
 
   @Override
-  synchronized public ReportEvent getReport() {
+  synchronized public ReportEvent getMetrics() {
     ReportEvent rpt = new ReportEvent(getName());
 
     // historical counts
-    Attributes.setLong(rpt, A_IMPORTED, importedCount.get());
-    Attributes.setLong(rpt, A_WRITING, writingCount.get());
-    Attributes.setLong(rpt, A_LOGGED, loggedCount.get());
-    Attributes.setLong(rpt, A_SENDING, sendingCount.get());
-    Attributes.setLong(rpt, A_SENT, sentCount.get());
-    Attributes.setLong(rpt, A_ACKED, ackedCount.get());
-    Attributes.setLong(rpt, A_RETRY, retryCount.get());
-    Attributes.setLong(rpt, A_ERROR, errCount.get());
-    Attributes.setLong(rpt, A_RECOVERED, recoverCount.get());
+    rpt.setLongMetric(A_IMPORTED, importedCount.get());
+    rpt.setLongMetric(A_WRITING, writingCount.get());
+    rpt.setLongMetric(A_LOGGED, loggedCount.get());
+    rpt.setLongMetric(A_SENDING, sendingCount.get());
+    rpt.setLongMetric(A_SENT, sentCount.get());
+    rpt.setLongMetric(A_ACKED, ackedCount.get());
+    rpt.setLongMetric(A_RETRY, retryCount.get());
+    rpt.setLongMetric(A_ERROR, errCount.get());
+    rpt.setLongMetric(A_RECOVERED, recoverCount.get());
 
     // Waiting to send
-    Attributes.setLong(rpt, A_IN_LOGGED, loggedQ.size());
+    rpt.setLongMetric(A_IN_LOGGED, loggedQ.size());
 
     // waiting for ack
-    Attributes.setLong(rpt, A_IN_SENT, sentQ.size());
+    rpt.setLongMetric(A_IN_SENT, sentQ.size());
 
+    rpt.setStringMetric("sentGroups", Arrays.toString(sentQ.toArray()));
+    rpt.setStringMetric("loggedGroups", Arrays.toString(loggedQ.toArray()));
     return rpt;
+  }
+
+  @Override
+  public Map<String, Reportable> getSubMetrics() {
+    return ReportUtils.noChildren();
   }
 
   @Override

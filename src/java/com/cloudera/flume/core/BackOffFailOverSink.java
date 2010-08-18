@@ -20,6 +20,7 @@ package com.cloudera.flume.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,6 +33,7 @@ import com.cloudera.flume.conf.FlumeConfiguration;
 import com.cloudera.flume.conf.FlumeSpecException;
 import com.cloudera.flume.conf.SinkFactory.SinkBuilder;
 import com.cloudera.flume.reporter.ReportEvent;
+import com.cloudera.flume.reporter.Reportable;
 import com.cloudera.util.BackoffPolicy;
 import com.cloudera.util.CappedExponentialBackoff;
 import com.cloudera.util.MultipleIOException;
@@ -222,6 +224,7 @@ public class BackOffFailOverSink extends EventSink.Base {
     return "BackoffFailover";
   }
 
+  @Deprecated
   @Override
   public ReportEvent getReport() {
     ReportEvent rpt = super.getReport();
@@ -233,11 +236,31 @@ public class BackOffFailOverSink extends EventSink.Base {
     return rpt;
   }
 
+  @Deprecated
   @Override
   public void getReports(String namePrefix, Map<String, ReportEvent> reports) {
     super.getReports(namePrefix, reports);
     primary.getReports(namePrefix + getName() + ".primary.", reports);
     backup.getReports(namePrefix + getName() + ".backup.", reports);
+  }
+
+  @Override
+  public ReportEvent getMetrics() {
+    ReportEvent e = super.getMetrics();
+
+    Attributes.setLong(e, A_FAILS, fails.get());
+    Attributes.setLong(e, A_BACKUPS, backups.get());
+    Attributes.setLong(e, A_PRIMARY, primarySent.get());
+
+    return e;
+  }
+
+  @Override
+  public Map<String, Reportable> getSubMetrics() {
+    Map<String, Reportable> map = new HashMap<String, Reportable>();
+    map.put("primary." + primary.getName(), primary);
+    map.put("backup." + backup.getName(), backup);
+    return map;
   }
 
   public long getFails() {

@@ -42,6 +42,8 @@ import com.cloudera.flume.conf.FlumeSpecException;
 import com.cloudera.flume.conf.FlumeSpecGen;
 import com.cloudera.flume.conf.LogicalNodeContext;
 import com.cloudera.flume.reporter.ReportEvent;
+import com.cloudera.flume.reporter.ReportUtils;
+import com.cloudera.flume.reporter.Reportable;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -154,7 +156,7 @@ public class ConfigManager implements ConfigurationManager {
    * TODO convert to a generic report
    */
   @Override
-  synchronized public ReportEvent getReport() {
+  synchronized public ReportEvent getMetrics() {
     StringBuilder html = new StringBuilder();
     html.append("<h2>Node configuration</h2>\n<table border=\"1\"><tr>"
         + "<th>Node</th><th>Version</th><th>Source</th><th>Sink</th></tr>");
@@ -179,6 +181,11 @@ public class ConfigManager implements ConfigurationManager {
     html.append("</table>\n\n");
 
     return ReportEvent.createLegacyHtmlReport("configs", html.toString());
+  }
+
+  @Override
+  public Map<String, Reportable> getSubMetrics() {
+    return ReportUtils.noChildren();
   }
 
   /**
@@ -323,8 +330,8 @@ public class ConfigManager implements ConfigurationManager {
           + ".  It doesn't exist!");
     }
 
-    cfgStore.setConfig(logicalNode, fcd.getFlowID(), fcd.getSourceConfig(),
-        fcd.getSinkConfig());
+    cfgStore.setConfig(logicalNode, fcd.getFlowID(), fcd.getSourceConfig(), fcd
+        .getSinkConfig());
   }
 
   /**

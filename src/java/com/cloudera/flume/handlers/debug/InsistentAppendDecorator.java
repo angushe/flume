@@ -20,6 +20,7 @@ package com.cloudera.flume.handlers.debug;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,8 @@ import com.google.common.base.Preconditions;
  */
 public class InsistentAppendDecorator<S extends EventSink> extends
     EventSinkDecorator<S> implements Reportable {
-  static final Logger LOG = LoggerFactory.getLogger(InsistentAppendDecorator.class);
+  static final Logger LOG = LoggerFactory
+      .getLogger(InsistentAppendDecorator.class);
   final BackoffPolicy backoff;
 
   // attribute names
@@ -181,10 +183,8 @@ public class InsistentAppendDecorator<S extends EventSink> extends
   }
 
   @Override
-  synchronized public ReportEvent getReport() {
-    ReportEvent rpt = super.getReport();
-    // parameters
-    rpt.hierarchicalMerge(backoff.getName(), backoff.getReport());
+  public ReportEvent getMetrics() {
+    ReportEvent rpt = super.getMetrics();
 
     // counters
     rpt.setLongMetric(A_REQUESTS, appendRequests);
@@ -194,5 +194,12 @@ public class InsistentAppendDecorator<S extends EventSink> extends
     rpt.setLongMetric(A_GIVEUPS, appendGiveups);
 
     return rpt;
+  }
+
+  @Override
+  public Map<String, Reportable> getSubMetrics() {
+    Map<String, Reportable> map = super.getSubMetrics();
+    map.put(backoff.getName(), backoff);
+    return map;
   }
 }

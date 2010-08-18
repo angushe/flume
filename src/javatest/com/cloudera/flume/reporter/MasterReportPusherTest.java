@@ -76,12 +76,16 @@ public class MasterReportPusherTest {
       }
 
       @Override
-      public ReportEvent getReport() {
+      public ReportEvent getMetrics() {
         ReportEvent r = new ReportEvent("test-reportable-report");
         r.setStringMetric("foo", "bar");
         return r;
       }
 
+      @Override
+      public Map<String, Reportable> getSubMetrics() {
+        return ReportUtils.noChildren();
+      }
     };
 
     rptMan.add(reportable);
