@@ -28,8 +28,10 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Assume;
 import org.junit.Test;
 
+import com.cloudera.flume.conf.Context;
 import com.cloudera.flume.conf.FlumeBuilder;
 import com.cloudera.flume.conf.FlumeSpecException;
+import com.cloudera.flume.conf.LogicalNodeContext;
 import com.cloudera.flume.core.connector.DirectDriver;
 import com.cloudera.flume.reporter.ReportEvent;
 import com.cloudera.flume.reporter.aggregator.AccumulatorSink;
@@ -73,20 +75,25 @@ public class TestTailDirSource {
     String src = "tailDir(\""
         + StringEscapeUtils.escapeJava(tmpdir.getAbsolutePath())
         + "\", \"foo.*\"";
-    FlumeBuilder.buildSource(src + ")"); // without startFromEnd param
-    FlumeBuilder.buildSource(src + ", true)"); // with startFromEnd = true
-    FlumeBuilder.buildSource(src + ", false)"); // with startFromEnd = false
-    FlumeBuilder.buildSource(src + ", true, 2)"); // recursively with max-depth 2
+
+    Context ctx = LogicalNodeContext.testingContext();
+    FlumeBuilder.buildSource(ctx, src + ")"); // without startFromEnd param
+    FlumeBuilder.buildSource(ctx, src + ", true)"); // with startFromEnd = true
+    FlumeBuilder.buildSource(ctx, src + ", false)"); // with startFromEnd =
+    // false
+    FlumeBuilder.buildSource(ctx, src + ", true,2)"); // recursively w/
+    // max-depth 2
     FileUtil.rmr(tmpdir);
   }
 
   @Test(expected = FlumeSpecException.class)
   public void testFailBuilder() throws IOException, FlumeSpecException {
+    Context ctx = LogicalNodeContext.testingContext();
     File tmpdir = FileUtil.mktempdir();
     String src = "tailDir(\""
         + StringEscapeUtils.escapeJava(tmpdir.getAbsolutePath())
         + "\", \"\\x.*\")";
-    FlumeBuilder.buildSource(src);
+    FlumeBuilder.buildSource(ctx, src);
     FileUtil.rmr(tmpdir);
   }
 
@@ -207,8 +214,8 @@ public class TestTailDirSource {
     FileUtil.rmr(tmpdir);
 
     // only did 10 files, ignored the dir.
-    assertEquals(Long.valueOf(10),
-        src.getReport().getLongMetric(TailDirSource.A_FILESADDED));
+    assertEquals(Long.valueOf(10), src.getReport().getLongMetric(
+        TailDirSource.A_FILESADDED));
   }
 
   /**
@@ -309,15 +316,14 @@ public class TestTailDirSource {
     // in total 20 files were added
     assertEquals(Long.valueOf(20),
         src.getReport().getLongMetric(TailDirSource.A_FILESADDED));
-
   }
 
   /**
-  * This is a tailDir source that tails files in subdirs with max-depth 2.
-  */
+   * This is a tailDir source that tails files in subdirs with max-depth 2.
+   */
   @Test
-  public void testTailDirsRecursively() throws IOException,
-      FlumeSpecException, InterruptedException {
+  public void testTailDirsRecursively() throws IOException, FlumeSpecException,
+      InterruptedException {
     File tmpdir = FileUtil.mktempdir();
     // generating files: emulating their existence prior to sink opening
     genFiles(tmpdir, "2tail-old", 10, 100);
@@ -325,9 +331,10 @@ public class TestTailDirSource {
     // creating subdirs with data, i.e. structure is:
     // root
     // `-- subdir-level1
-    //    `-- subdir-level2
-    //        `-- subdir-level3
-    // NOTE: the deepest subdir-level3 shouldn't be watched as recurse-depth is 2.
+    // `-- subdir-level2
+    // `-- subdir-level3
+    // NOTE: the deepest subdir-level3 shouldn't be watched as recurse-depth is
+    // 2.
     File subDirL1 = new File(tmpdir, "subdir-level1");
     subDirL1.mkdirs();
     genFiles(subDirL1, "2tail-old1", 10, 10);
@@ -403,7 +410,8 @@ public class TestTailDirSource {
     assertEquals(Long.valueOf(1), report.getLongMetric(TailDirSource.A_SUBDIRSDELETED));
   }
 
-  private void addLinesToExistingFiles(File tmpdir, int lines) throws IOException {
+  private void addLinesToExistingFiles(File tmpdir, int lines)
+      throws IOException {
     int fileIndex = 0;
     for (File tmpfile : tmpdir.listFiles()) {
       if (tmpfile.isDirectory()) {
@@ -445,7 +453,7 @@ public class TestTailDirSource {
         rpt1.getLongMetric(TailDirSource.A_FILESPRESENT));
 
     FileUtil.rmr(tmpdir); // This fails in windows because taildir keeps file
-                          // open
+    // open
     tmpdir.mkdirs();
     Clock.sleep(1000);
     assertEquals(2000, cnt.getCount());
