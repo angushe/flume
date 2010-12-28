@@ -1,0 +1,21 @@
+#!/bin/bash
+# Writes a new lines. Argument is number seconds between lines.  this can be a float (non integer value)
+
+SLEEP=.250
+if [ "$#" -ge 1 ] ; then
+  SLEEP=$1
+fi 
+
+HOST=`hostname`
+if [ "$#" -ge 2 ] ; then
+  HOST=$2
+fi
+
+CNT=0
+
+while [ true ] 
+do 
+  printf "%020d %s\n" $CNT $HOST
+  CNT=`expr $CNT + 1`
+  sleep "$SLEEP"
+done

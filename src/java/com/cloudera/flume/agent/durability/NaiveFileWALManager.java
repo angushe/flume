@@ -19,6 +19,7 @@ package com.cloudera.flume.agent.durability;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -574,6 +575,10 @@ public class NaiveFileWALManager implements WALManager {
   synchronized public void retry(String tag) throws IOException {
     // Yuck. This is like a CAS right now.
     WALData data = table.get(tag);
+    if (data == null) {
+      // wrong WALManager
+      return;
+    }
     if (data != null) {
       if (data.s == State.SENDING || data.s == State.LOGGED) {
         LOG.warn("There was a race that happend with SENT vs SENDING states");
