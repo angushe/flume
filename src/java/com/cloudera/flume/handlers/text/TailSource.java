@@ -385,11 +385,20 @@ public class TailSource extends EventSource.Base {
           // // 4) raf len == file len, last read == file len, lastMod diff ?!
           // ->
           // restart file.
-          LOG.debug("tail " + file
-                  + " : same file len, but new last mod time" + " -> reset");
-          resetRAF();
-          return true;
-
+          
+          // check the channel size again to ensure we really detect the 
+          // different file correctly
+          chlen = in.size();
+          if(lastChannelSize == chlen) {
+              LOG.debug("tail " + file
+                      + " : same file len, but new last mod time" + " -> reset");
+              resetRAF();
+              return true;
+          }
+          LOG.debug("last channel size:" + lastChannelSize + ", new channel size:" + chlen);
+          lastChannelSize = chlen;
+          flen = file.length();
+          fmod = file.lastModified();
         }
 
         // file has changed
